@@ -73,6 +73,7 @@ static int regular_flow(descriptor *ds, unsigned int ioctl_p)
 {
   channel_node *curr = all_devices[ds->minor_number];
   channel_node *prev = curr;
+  channel_node *new_channel;
   while (curr != NULL)
   {
 
@@ -84,7 +85,7 @@ static int regular_flow(descriptor *ds, unsigned int ioctl_p)
     }
     curr = curr->next_channel;
   }
-  channel_node *new_channel = kmalloc(sizeof(channel_node), GFP_KERNEL);
+  new_channel = kmalloc(sizeof(channel_node), GFP_KERNEL);
   if (new_channel == NULL)
   {
     return -1;
@@ -121,6 +122,7 @@ static long device_ioctl(struct file *file, unsigned int ioctl_id, /*channel id*
 
 static ssize_t device_write(struct file *file, const char __user *buffer, size_t length, loff_t *offset)
 {
+  int i;
   descriptor *ds = (descriptor *)file->private_data;
   if (ds->set_channel == NULL)
   {
@@ -130,7 +132,7 @@ static ssize_t device_write(struct file *file, const char __user *buffer, size_t
   {
     return -EMSGSIZE;
   }
-  int i, j;
+
   for (i = 0; i < 128 && i < length; i++)
   {
     get_user(ds->set_channel->message[i], &buffer[i]);
